@@ -8,32 +8,26 @@ import { RootStackParamList, Preset } from '../types';
 import { loadPresets, savePresets } from '../storage';
 import { STARTER_PRESETS } from '../starterPreset';
 import { formatDuration } from '../audio';
+import DrawerMenu from '../components/DrawerMenu';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export default function HomeScreen({ navigation }: Props) {
-  const [presets, setPresets] = useState<Preset[]>([]);
+  const [presets, setPresets]       = useState<Preset[]>([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
-        <View style={styles.headerButtons}>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Settings')}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            style={styles.headerBtn}
-          >
-            <Text style={styles.headerBtnText}>⚙︎</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Help')}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            style={styles.headerBtn}
-          >
-            <Text style={styles.headerBtnText}>?</Text>
-          </TouchableOpacity>
-        </View>
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => setDrawerOpen(true)}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          style={styles.headerBtn}
+        >
+          <Text style={styles.headerBtnText}>☰</Text>
+        </TouchableOpacity>
       ),
+      headerRight: undefined,
     });
   }, [navigation]);
 
@@ -113,6 +107,12 @@ export default function HomeScreen({ navigation }: Props) {
           <Text style={styles.newButtonText}>+ New Session</Text>
         </TouchableOpacity>
       </View>
+
+      <DrawerMenu
+        visible={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onHowItWorks={() => navigation.navigate('Help')}
+      />
     </ImageBackground>
   );
 }
@@ -153,7 +153,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   newButtonText: { color: '#fff', fontSize: 19, fontWeight: '600' },
-  headerButtons: { flexDirection: 'row', gap: 16, alignItems: 'center' },
   headerBtn: {},
   headerBtnText: { color: '#aaa', fontSize: 22, fontWeight: '400' },
 });

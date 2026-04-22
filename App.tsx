@@ -4,9 +4,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
-import { configureAudioSession, configureNotificationHandler, requestNotificationPermissions, initBestVoice, setAppVolume } from './src/audio';
+import { configureAudioSession, configureNotificationHandler, requestNotificationPermissions, initBestVoice, setAppVolume, setVoiceEnabled, setDingEnabled } from './src/audio';
 import { hasOnboarded } from './src/storage';
-import { loadVolume } from './src/settings';
+import { loadVolume, loadVoiceEnabled, loadDingEnabled } from './src/settings';
 
 // Keep splash visible until we're ready to show the app
 SplashScreen.preventAutoHideAsync();
@@ -30,6 +30,8 @@ export default function App() {
     requestNotificationPermissions().catch(console.error);
     initBestVoice().catch(console.error);
     loadVolume().then(setAppVolume).catch(console.error);
+    loadVoiceEnabled().then(setVoiceEnabled).catch(console.error);
+    loadDingEnabled().then(setDingEnabled).catch(console.error);
 
     Promise.all([
       hasOnboarded(),

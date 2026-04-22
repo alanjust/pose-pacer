@@ -41,15 +41,18 @@ export async function requestNotificationPermissions(): Promise<boolean> {
 // ---------------------------------------------------------------------------
 // App-wide volume (0.0 – 1.0) — set once at startup, updated from Settings
 // ---------------------------------------------------------------------------
-let appVolume = 1.0;
+let appVolume   = 1.0;
+let voiceEnabled = true;
+let dingEnabled  = true;
 
-export function setAppVolume(v: number): void {
-  appVolume = Math.min(1, Math.max(0, v));
-}
+export function setAppVolume(v: number): void { appVolume = Math.min(1, Math.max(0, v)); }
+export function getAppVolume(): number { return appVolume; }
 
-export function getAppVolume(): number {
-  return appVolume;
-}
+export function setVoiceEnabled(v: boolean): void { voiceEnabled = v; }
+export function getVoiceEnabled(): boolean { return voiceEnabled; }
+
+export function setDingEnabled(v: boolean): void { dingEnabled = v; }
+export function getDingEnabled(): boolean { return dingEnabled; }
 
 // ---------------------------------------------------------------------------
 // Immediate sound playback (foreground)
@@ -60,6 +63,7 @@ const soundFiles: Record<SoundChoice, ReturnType<typeof require>> = {
 };
 
 export async function playSound(which: SoundChoice): Promise<void> {
+  if (!dingEnabled) return;
   try {
     const { sound } = await Audio.Sound.createAsync(soundFiles[which]);
     await sound.setVolumeAsync(appVolume);
@@ -84,7 +88,7 @@ export async function scheduleEndNotification(
     content: {
       title: 'Time',
       body: 'Pose complete.',
-      sound: true,
+      sound: dingEnabled,
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DATE,
@@ -135,6 +139,7 @@ export async function initBestVoice(): Promise<void> {
 // or immediately after the start ding for modules with no lead-in.
 // ---------------------------------------------------------------------------
 export function announceModule(module: Module): void {
+  if (!voiceEnabled) return;
   // Stop any speech already in progress (e.g. a leftover warning)
   Speech.stop();
 
@@ -169,6 +174,7 @@ export function announceModule(module: Module): void {
 // Verbal countdown warning using text-to-speech
 // ---------------------------------------------------------------------------
 export function speakWarning(text: string): void {
+  if (!voiceEnabled) return;
   Speech.speak(text, {
     language: 'en-US',
     rate: 0.9,
