@@ -56,7 +56,10 @@ export default function BuilderScreen({ navigation, route }: Props) {
     navigation.setOptions({
       title: preset?.name ?? (isNewSession ? 'New Session' : 'Session'),
       headerRight: () => (
-        <TouchableOpacity onPress={() => setSaveModalVisible(true)}>
+        <TouchableOpacity onPress={() => {
+          setSaveName(preset?.name ?? '');
+          setSaveModalVisible(true);
+        }}>
           <Text style={styles.headerSave}>Save</Text>
         </TouchableOpacity>
       ),

@@ -75,8 +75,8 @@ const styles = StyleSheet.create({
   badgeText: { color: '#fff', fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
   info: { flex: 1 },
   label: { color: '#fff', fontSize: 16, fontWeight: '500' },
-  duration: { color: '#555', fontSize: 13, marginTop: 2 },
-  editHint: { color: '#333', fontSize: 14 },
+  duration: { color: '#4a9b6a', fontSize: 13, marginTop: 2 },
+  editHint: { color: '#4a9b6a', fontSize: 14 },
   actions: {
     flexDirection: 'row',
     borderTopWidth: 1,
