@@ -1,18 +1,26 @@
 {
   "expo": {
-    "name": "life-drawing-timer-app",
-    "slug": "life-drawing-timer-app",
+    "name": "Life Drawing Timer",
+    "slug": "life-drawing-timer",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "resizeMode": "cover",
+      "backgroundColor": "#d9cfc4"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "audio",
+          "audio"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "bundleIdentifier": "com.alanrjust.life-drawing-timer"
     },
     "android": {
       "adaptiveIcon": {
@@ -25,6 +33,22 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "sounds": [
+            "./assets/sounds/ding_single.wav",
+            "./assets/sounds/ding_double.wav"
+          ]
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "c990b48b-96f1-4c20-9917-a3ed81b599d7"
+      }
     }
   }
 }
