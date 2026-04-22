@@ -118,10 +118,9 @@ export default function HomeScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0a0a0a' },
+  container: { flex: 1, backgroundColor: '#6b563e' },
   bgImage: {
     resizeMode: 'cover',
-    opacity: 0.18,
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -145,6 +144,7 @@ const styles = StyleSheet.create({
     paddingBottom: 36,
     borderTopWidth: 1,
     borderTopColor: '#1a1a1a',
+    backgroundColor: '#0a0a0a',
   },
   newButton: {
     backgroundColor: '#1a6b3c',
