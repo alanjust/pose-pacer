@@ -18,7 +18,8 @@ export default function HomeScreen({ navigation }: Props) {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerLeft: () => (
+      headerLeft: () => null,
+      headerRight: () => (
         <TouchableOpacity
           onPress={() => setDrawerOpen(true)}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -27,7 +28,6 @@ export default function HomeScreen({ navigation }: Props) {
           <Text style={styles.headerBtnText}>☰</Text>
         </TouchableOpacity>
       ),
-      headerRight: undefined,
     });
   }, [navigation]);
 

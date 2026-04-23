@@ -32,7 +32,7 @@ export default function ModuleForm({ module, visible, onSave, onCancel }: Props)
   const [endSound,     setEndSound]     = useState<SoundChoice>(module?.endSound ?? 'double');
   const [leadIn,       setLeadIn]       = useState(module?.leadIn ?? false);
   const [warningInput, setWarningInput] = useState(
-    module?.warningThresholdSeconds ? String(module.warningThresholdSeconds) : ''
+    module?.warningThresholdSeconds ? String(Math.round(module.warningThresholdSeconds / 60)) : ''
   );
 
   // Reset all fields when the modal opens with a (possibly different) module
@@ -43,12 +43,12 @@ export default function ModuleForm({ module, visible, onSave, onCancel }: Props)
     setStartSound(m?.startSound ?? 'single');
     setEndSound(m?.endSound ?? 'double');
     setLeadIn(m?.leadIn ?? false);
-    setWarningInput(m?.warningThresholdSeconds ? String(m.warningThresholdSeconds) : '');
+    setWarningInput(m?.warningThresholdSeconds ? String(Math.round(m.warningThresholdSeconds / 60)) : '');
   }
 
   function handleSave() {
     const warningThresholdSeconds = warningInput.trim()
-      ? Math.max(0, parseInt(warningInput, 10))
+      ? Math.max(0, parseInt(warningInput, 10)) * 60
       : undefined;
 
     onSave({
@@ -168,13 +168,13 @@ export default function ModuleForm({ module, visible, onSave, onCancel }: Props)
           </View>
 
           {/* Warning threshold */}
-          <Text style={styles.sectionLabel}>VERBAL WARNING (seconds before end, optional)</Text>
+          <Text style={styles.sectionLabel}>VERBAL WARNING (minutes before end, optional)</Text>
           <TextInput
             style={styles.input}
             value={warningInput}
             onChangeText={setWarningInput}
             keyboardType="number-pad"
-            placeholder="e.g. 30"
+            placeholder="e.g. 5"
             placeholderTextColor="#555"
           />
 

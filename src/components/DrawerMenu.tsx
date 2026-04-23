@@ -1,17 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  Animated, Modal, PanResponder, StyleSheet,
+  Alert, Animated, Modal, PanResponder, StyleSheet,
   Switch, Text, TouchableOpacity, TouchableWithoutFeedback, View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   getAppVolume, setAppVolume,
   getDingEnabled, setDingEnabled as setAudioDing,
   getVoiceEnabled, setVoiceEnabled as setAudioVoice,
 } from '../audio';
 import { saveDingEnabled, saveVoiceEnabled, saveVolume } from '../settings';
+import { savePresets } from '../storage';
+import { STARTER_PRESETS } from '../starterPreset';
 
 const DRAWER_WIDTH = 300;
-const THUMB = 26;
+const THUMB        = 26;
 
 function clamp(v: number) { return Math.min(1, Math.max(0, v)); }
 
@@ -22,7 +25,8 @@ interface Props {
 }
 
 export default function DrawerMenu({ visible, onClose, onHowItWorks }: Props) {
-  const translateX = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
+  // Drawer slides in from the right — starts off-screen to the right
+  const translateX = useRef(new Animated.Value(DRAWER_WIDTH)).current;
 
   const [volume, setVolume]           = useState(getAppVolume());
   const [voiceOn, setVoiceOn]         = useState(getVoiceEnabled());
@@ -53,7 +57,7 @@ export default function DrawerMenu({ visible, onClose, onHowItWorks }: Props) {
       }).start();
     } else {
       Animated.timing(translateX, {
-        toValue: -DRAWER_WIDTH,
+        toValue: DRAWER_WIDTH,
         duration: 220,
         useNativeDriver: true,
       }).start();
@@ -116,7 +120,12 @@ export default function DrawerMenu({ visible, onClose, onHowItWorks }: Props) {
       onRequestClose={onClose}
     >
       <View style={styles.root}>
-        {/* ── Drawer panel ── */}
+        {/* ── Backdrop — tap to close ── */}
+        <TouchableWithoutFeedback onPress={onClose}>
+          <View style={styles.backdrop} />
+        </TouchableWithoutFeedback>
+
+        {/* ── Drawer panel (right side) ── */}
         <Animated.View style={[styles.drawer, { transform: [{ translateX }] }]}>
 
           {/* Header */}
@@ -187,12 +196,58 @@ export default function DrawerMenu({ visible, onClose, onHowItWorks }: Props) {
             />
           </View>
 
-        </Animated.View>
+          {/* Developer section */}
+          <View style={styles.devDivider} />
 
-        {/* ── Backdrop — tap to close ── */}
-        <TouchableWithoutFeedback onPress={onClose}>
-          <View style={styles.backdrop} />
-        </TouchableWithoutFeedback>
+          {/* Reset presets to defaults */}
+          <TouchableOpacity
+            style={styles.row}
+            onPress={() => {
+              Alert.alert(
+                'Reset presets to defaults?',
+                'Your current sessions will be replaced with the three starter presets. This can\'t be undone.',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Reset', style: 'destructive',
+                    onPress: async () => {
+                      await savePresets(STARTER_PRESETS);
+                      onClose();
+                    },
+                  },
+                ]
+              );
+            }}
+          >
+            <Text style={styles.devLabel}>Reset presets to defaults</Text>
+          </TouchableOpacity>
+          <View style={styles.devItemDivider} />
+
+          {/* Reset onboarding */}
+          <TouchableOpacity
+            style={styles.row}
+            onPress={() => {
+              Alert.alert(
+                'Reset onboarding?',
+                'The welcome flow will run again on next cold launch.',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Reset', style: 'destructive',
+                    onPress: async () => {
+                      await AsyncStorage.removeItem('hasOnboarded');
+                      onClose();
+                      Alert.alert('Done', 'Kill and reopen the app to see onboarding.');
+                    },
+                  },
+                ]
+              );
+            }}
+          >
+            <Text style={styles.devLabelMuted}>Reset onboarding</Text>
+          </TouchableOpacity>
+
+        </Animated.View>
       </View>
     </Modal>
   );
@@ -287,5 +342,24 @@ const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  devDivider: {
+    height: 1,
+    backgroundColor: '#1a1a1a',
+    marginHorizontal: 20,
+    marginTop: 24,
+  },
+  devItemDivider: {
+    height: 1,
+    backgroundColor: '#1a1a1a',
+    marginHorizontal: 20,
+  },
+  devLabel: {
+    color: '#e05c5c',
+    fontSize: 15,
+  },
+  devLabelMuted: {
+    color: 'rgba(224, 92, 92, 0.5)',
+    fontSize: 15,
   },
 });
