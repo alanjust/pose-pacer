@@ -130,7 +130,7 @@ export default function DrawerMenu({ visible, onClose, onHowItWorks }: Props) {
 
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>Life Drawing Timer</Text>
+            <Text style={styles.headerTitle}>Pose Pacer</Text>
           </View>
 
           {/* How it works */}

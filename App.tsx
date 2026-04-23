@@ -68,7 +68,7 @@ export default function App() {
         <Stack.Screen
           name="Home"
           component={HomeScreen}
-          options={{ title: 'Life Drawing Timer' }}
+          options={{ title: 'Pose Pacer' }}
         />
         <Stack.Screen
           name="Help"
