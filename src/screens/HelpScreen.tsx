@@ -23,7 +23,7 @@ To add a module, tap "+ Add Module." Give it a type (Pose or Break), a duration,
 
   • Lead-in — a 10-second "get ready" countdown before the timer starts. Useful when the model needs a moment to get into position.
 
-  • Verbal warning — the app will say "30 seconds remaining" (or whatever threshold you set) before the module ends.
+  • Verbal warning — the app will say "two minutes remaining" (or whatever threshold you set) before the module ends.
 
 Tap a module to edit it. Use the arrows to reorder. The copy icon duplicates it — handy for repeating the same pose duration several times in a row.`,
   },
@@ -57,7 +57,7 @@ Double ding — a module just ended.
 
 Voice — the module name and duration, spoken at the start of each segment. If a module has a lead-in, the voice speaks during that 10-second window so the model has time to settle.
 
-The app also speaks a verbal warning before a module ends, if you've set one. "Thirty seconds" means thirty seconds. Not a suggestion.`,
+The app also speaks a verbal warning before a module ends, if you've set one. "Two minutes remaining" means two minutes remaining. Not a suggestion.`,
   },
 ];
 
