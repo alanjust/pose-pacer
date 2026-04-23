@@ -39,6 +39,7 @@ export default function PlayerScreen({ navigation, route }: Props) {
   const endTimeMsRef = useRef(0);
   const warningFiredRef = useRef(false);
   const pausedSecsRef   = useRef<number | null>(null);
+  const pausedPhaseRef  = useRef<'leadIn' | 'running'>('running');
   const busyRef     = useRef(false);
   const timelineRef = useRef<ModuleEntry[]>([]);  // full session schedule
 
@@ -300,43 +301,64 @@ export default function PlayerScreen({ navigation, route }: Props) {
   async function handlePauseResume() {
     const p = phaseRef.current;
 
-    if (p === 'running') {
-      // Pause: cancel all future notifications so they don't fire while paused
+    if (p === 'running' || p === 'leadIn') {
+      // Pause: endTimeMsRef points to runStartMs during lead-in, endMs during running
+      // — either way, remaining seconds from it is the right value to save.
       const secsLeft = Math.max(1, Math.ceil((endTimeMsRef.current - Date.now()) / 1000));
-      pausedSecsRef.current = secsLeft;
+      pausedSecsRef.current  = secsLeft;
+      pausedPhaseRef.current = p;
       await cancelAllNotifications();
       setPhaseSync('paused');
       setSeconds(secsLeft);
 
     } else if (p === 'paused') {
-      // Resume: rebuild timeline from the current module with remaining time,
-      // then reschedule all remaining notifications
       const idx      = indexRef.current;
       const secsLeft = pausedSecsRef.current ?? 0;
       const now      = Date.now();
-
       const entries: ModuleEntry[] = [];
 
-      // Current module: resumes with secsLeft remaining (no lead-in re-entry)
-      const currentEndMs = now + secsLeft * 1000;
-      const currentNotifId = await scheduleEndNotification(currentEndMs, modules[idx].endSound);
-      entries.push({ moduleIndex: idx, runStartMs: now, endMs: currentEndMs, notifId: currentNotifId });
+      if (pausedPhaseRef.current === 'leadIn') {
+        // Resume mid-lead-in: push runStartMs into the future by remaining lead-in secs
+        const newRunStartMs = now + secsLeft * 1000;
+        const newEndMs      = newRunStartMs + modules[idx].durationSeconds * 1000;
+        const notifId = await scheduleEndNotification(newEndMs, modules[idx].endSound);
+        entries.push({ moduleIndex: idx, runStartMs: newRunStartMs, endMs: newEndMs, notifId });
+        endTimeMsRef.current = newRunStartMs; // interval still counts down to lead-in end
 
-      // Remaining modules follow in sequence
-      let t = currentEndMs;
-      for (let i = idx + 1; i < modules.length; i++) {
-        const mod = modules[i];
-        if (mod.leadIn) t += 10_000;
-        const runStartMs = t;
-        t += mod.durationSeconds * 1000;
-        const endMs = t;
-        const notifId = await scheduleEndNotification(endMs, mod.endSound);
-        entries.push({ moduleIndex: i, runStartMs, endMs, notifId });
+        // Remaining modules follow in sequence
+        let t = newEndMs;
+        for (let i = idx + 1; i < modules.length; i++) {
+          const mod = modules[i];
+          if (mod.leadIn) t += 10_000;
+          const runStartMs = t;
+          t += mod.durationSeconds * 1000;
+          const notifId = await scheduleEndNotification(t, mod.endSound);
+          entries.push({ moduleIndex: i, runStartMs, endMs: t, notifId });
+        }
+
+        timelineRef.current = entries;
+        setPhaseSync('leadIn');
+
+      } else {
+        // Resume mid-run: same as before
+        const currentEndMs   = now + secsLeft * 1000;
+        const currentNotifId = await scheduleEndNotification(currentEndMs, modules[idx].endSound);
+        entries.push({ moduleIndex: idx, runStartMs: now, endMs: currentEndMs, notifId: currentNotifId });
+
+        let t = currentEndMs;
+        for (let i = idx + 1; i < modules.length; i++) {
+          const mod = modules[i];
+          if (mod.leadIn) t += 10_000;
+          const runStartMs = t;
+          t += mod.durationSeconds * 1000;
+          const notifId = await scheduleEndNotification(t, mod.endSound);
+          entries.push({ moduleIndex: i, runStartMs, endMs: t, notifId });
+        }
+
+        timelineRef.current  = entries;
+        endTimeMsRef.current = currentEndMs;
+        setPhaseSync('running');
       }
-
-      timelineRef.current = entries;
-      endTimeMsRef.current = currentEndMs;
-      setPhaseSync('running');
     }
   }
 
@@ -472,9 +494,9 @@ export default function PlayerScreen({ navigation, route }: Props) {
       {/* Footer */}
       <View style={styles.footer}>
         <TouchableOpacity
-          style={[styles.pauseBtn, phase === 'leadIn' && styles.btnDisabled]}
+          style={styles.pauseBtn}
           onPress={handlePauseResume}
-          disabled={phase === 'leadIn'}
+          disabled={phase === 'done'}
         >
           <Text style={styles.pauseBtnText}>
             {phase === 'paused' ? '▶  Resume' : '⏸  Pause'}
